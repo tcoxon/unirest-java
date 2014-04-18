@@ -27,12 +27,14 @@ package com.mashape.unirest.http.async;
 
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import com.mashape.unirest.http.utils.ProgressListener;
 
-public interface Callback<T> {
+public interface Callback<T> extends ProgressListener {
 
 	void completed(HttpResponse<T> response);	
 	
 	void failed(UnirestException e);
 	
 	void cancelled();
+	
 }

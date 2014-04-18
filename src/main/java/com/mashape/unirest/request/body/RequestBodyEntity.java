@@ -29,6 +29,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.entity.StringEntity;
 
 import com.mashape.unirest.http.JsonNode;
+import com.mashape.unirest.http.utils.ProgressListener;
 import com.mashape.unirest.request.BaseRequest;
 import com.mashape.unirest.request.HttpRequest;
 
@@ -56,6 +57,16 @@ public class RequestBodyEntity extends BaseRequest implements Body {
 
 	public HttpEntity getEntity() {
 		return new StringEntity(body.toString(), UTF_8);
+	}
+
+	@Override
+	public void progress(double progress, double change) {
+		// not used
+	}
+
+	@Override
+	public void setProgressListener(ProgressListener listener) {
+		// not used
 	}
 
 }

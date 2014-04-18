@@ -35,10 +35,11 @@ import org.apache.http.HttpEntity;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 
 import com.mashape.unirest.http.utils.MapUtil;
+import com.mashape.unirest.http.utils.ProgressFileBody;
+import com.mashape.unirest.http.utils.ProgressListener;
 import com.mashape.unirest.request.BaseRequest;
 import com.mashape.unirest.request.HttpRequest;
 
@@ -48,6 +49,8 @@ public class MultipartBody extends BaseRequest implements Body {
 
 	private boolean hasFile;
 	private HttpRequest httpRequestObj;
+	
+	private ProgressListener listener;
 	
 	public MultipartBody(HttpRequest httpRequest) {
 		super(httpRequest);
@@ -75,7 +78,7 @@ public class MultipartBody extends BaseRequest implements Body {
 			MultipartEntityBuilder builder = MultipartEntityBuilder.create();
 			for(Entry<String, Object> part : parameters.entrySet()) {
 				if (part.getValue() instanceof File) {
-					builder.addPart(part.getKey(), new FileBody((File) part.getValue()));
+					builder.addPart(part.getKey(), new ProgressFileBody((File) part.getValue(), this));
 				} else {
 					builder.addPart(part.getKey(), new StringBody(part.getValue().toString(), ContentType.APPLICATION_FORM_URLENCODED));
 				}
@@ -88,6 +91,17 @@ public class MultipartBody extends BaseRequest implements Body {
 				throw new RuntimeException(e);
 			}
 		}
+	}
+
+	@Override
+	public void progress(double progress, double change) {
+		if (listener != null)
+			listener.progress(progress, change);
+	}
+	
+	@Override
+	public void setProgressListener(ProgressListener listener) {
+		this.listener = listener;
 	}
 
 }

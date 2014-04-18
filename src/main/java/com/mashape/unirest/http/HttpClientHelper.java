@@ -57,7 +57,9 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 import com.mashape.unirest.http.options.Option;
 import com.mashape.unirest.http.options.Options;
 import com.mashape.unirest.http.utils.ClientFactory;
+import com.mashape.unirest.http.utils.ProgressListener;
 import com.mashape.unirest.request.HttpRequest;
+import com.mashape.unirest.request.body.Body;
 
 public class HttpClientHelper {
 
@@ -86,7 +88,7 @@ public class HttpClientHelper {
 	}
 
 	public static <T> Future<HttpResponse<T>> requestAsync(HttpRequest request, final Class<T> responseClass, Callback<T> callback) {
-		HttpUriRequest requestObj = prepareRequest(request, true);
+		HttpUriRequest requestObj = prepareRequest(request, true, callback);
 
 		CloseableHttpAsyncClient asyncHttpClient = ClientFactory.getAsyncHttpClient();
 		if (!asyncHttpClient.isRunning()) {
@@ -126,7 +128,7 @@ public class HttpClientHelper {
 	}
 
 	public static <T> HttpResponse<T> request(HttpRequest request, Class<T> responseClass) throws UnirestException {
-		HttpRequestBase requestObj = prepareRequest(request, false);
+		HttpRequestBase requestObj = prepareRequest(request, false, null);
 		HttpClient client = ClientFactory.getHttpClient(); // The
 															// DefaultHttpClient
 															// is thread-safe
@@ -144,7 +146,8 @@ public class HttpClientHelper {
 		}
 	}
 
-	private static HttpRequestBase prepareRequest(HttpRequest request, boolean async) {
+	private static HttpRequestBase prepareRequest(HttpRequest request, boolean async,
+			ProgressListener progressListener) {
 
 		request.header("user-agent", USER_AGENT);
 		request.header("accept-encoding", "gzip");
@@ -197,7 +200,11 @@ public class HttpClientHelper {
 		// Set body
 		if (!(request.getHttpMethod() == HttpMethod.GET || request.getHttpMethod() == HttpMethod.HEAD)) {
 			if (request.getBody() != null) {
-				HttpEntity entity = request.getBody().getEntity();
+				Body body = request.getBody();
+				HttpEntity entity = body.getEntity();
+				if (progressListener != null) {
+					body.setProgressListener(progressListener);
+				}
 				if (async) {
 					reqObj.setHeader(entity.getContentType());
 					try {

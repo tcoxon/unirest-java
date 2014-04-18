@@ -27,8 +27,12 @@ package com.mashape.unirest.request.body;
 
 import org.apache.http.HttpEntity;
 
-public interface Body {
+import com.mashape.unirest.http.utils.ProgressListener;
+
+public interface Body extends ProgressListener {
 
 	HttpEntity getEntity();
+	
+	void setProgressListener(ProgressListener listener);
 	
 }
